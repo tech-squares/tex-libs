@@ -1,0 +1,42 @@
+This directory contains the macro files needed by TeX and LaTeX
+and by dvips.  To find them here (assuming your login shell is tcsh):
+
+setenv TEXINPUTS .:/mit/tech-squares/lib/tex/macros:
+setenv DVIPSHEADERS $TEXINPUTS
+
+or, with the Bash shell:
+
+export TEXINPUTS=.:/mit/tech-squares/lib/tex/macros:
+export DVIPSHEADERS=$TEXINPUTS
+
+Note that the tech-squares Makefiles already do this for you, so you
+probably don't have to set these variables.
+
+
+Most of the tech-squares Makefiles use chained dependencies, which the
+Solaris "make" cannot handle.  Run "gmake" to get GNU make, which does
+this correctly.
+
+
+The "ps2pdf" program is in the "gnu" locker; the Makefile finds it
+there automatically.  You can also use "distill", in the "acro"
+locker, to generate your PDF files.
+
+
+If you are using xfig or some other drawing program, do not use the
+tech-logo-words.eps file here.  Instead, use tech-logo.epsi, found in
+the doc/logo directory.
+
+The file doc/lessons/README has even more info about running LaTeX and
+printing the results.
+
+--------------------------------------------
+
+How to generate tech-logo-words.pdf:
+
+I'm not sure what the correct way to do this, but I eventually made
+this work with:
+
+(grep -E '(PS-Adobe|BoundingBox)' tech-logo-words.eps; cat TechSquares-font2.pro tech-logo-words.eps) | epstopdf -f -o tech-logo-words.pdf
+
+-- Kevin Chen, 3/24/2015

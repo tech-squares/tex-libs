@@ -1,0 +1,109 @@
+% Tab separated values, an environment for typesetting them.
+% Should be renamed "dsv.sty" for "delimiter-separated values".
+% Time-stamp: <2004-01-14 15:20:53 gildea>
+% By Stephen Gildea, March 2000.
+
+% Defines the environment tsv,
+% which is like tabular, but uses tabs and newlines
+% to separate fields.  This is useful for typesetting
+% a file exported by a spreadsheet program:
+% \begin{tsv}{llc}
+% \input{spreadsheet-export.txt}
+% \end{tsv}
+
+% But if you are really inputting a spreadsheet output file and don't
+% want to set the format, you can use the simpler \tsvfile command:
+% \tsvfile{spreadsheet-export.txt}
+
+% The environment ttsv
+% allows multiple tabs to separate columns.
+% If you need a blank column, use ~ (a tie).
+% This can make your manuscript easier to read
+% and the columns line up nicer.
+
+% The environment csv
+% typesets comma-separated values tables.
+% A \, (backslash comma) creates a real comma.
+% (MS/Excel puts double quotes around fields that contain a comma
+% or double quote; inside a double quote is doubled.)
+
+% The environment usersv
+% lets you specify what the field-separating character is:
+% \begin{usersv}{;}{lrl}
+% 1;First;Last
+% 2;Stephen;Gildea
+% \end{usersv}
+
+% 2000/03/24 original version
+% 2002/04/18 turn off math meaning of underscore
+% 2002/04/19 add supertabular option for multi-page tables (s/b
+%		 default?), handle double quotes minimally
+% 2003/12/21 gobble newline after \begin
+
+\ProvidesPackage{tsv}[2003/12/21 Tab separated values]
+
+\def\tsv@tabulartype{tabular}
+
+\DeclareOption{supertabular}{
+  \AtEndOfPackage{\RequirePackage{supertabular}}
+  \def\tsv@tabulartype{supertabular}}
+
+\ProcessOptions
+
+\newenvironment{tsv}[1]%
+  {\tsv@redefine@chars\tsv@tabonealign
+   \begin{\tsv@tabulartype}{#1}\tsv@gobblenewline}
+  % The \crcr prevents a "Misplaced \noalign." error from supertabular
+  {\crcr\end{\tsv@tabulartype}}
+
+\newenvironment{ttsv}[1]%
+  {\tsv@redefine@chars\tsv@tabmultialign
+   \begin{\tsv@tabulartype}{#1}\tsv@gobblenewline}
+  {\crcr\end{\tsv@tabulartype}}
+
+\newenvironment{csv}[1]%
+  {\let\,=,\begin{usersv}{,}{#1}}
+  {\end{usersv}}
+
+\newenvironment{usersv}[2]%
+  {\tsv@redefine@chars\tsv@definealignchar{#1}
+   \begin{\tsv@tabulartype}{#2}\tsv@gobblenewline}
+  {\crcr\end{\tsv@tabulartype}}
+
+\newcommand\tsvfile[1]{%
+  \begin{tsv}{*{50}{l}}
+  \input{#1}%
+  \end{tsv}}
+
+% Turn off special meaning of & and _ and 
+% set Newline char to be the same as the \\ command.
+{\catcode`\^^M=\active \catcode`\_=\active \catcode`\"=\active
+ \gdef\tsv@redefine@chars{\catcode`\&=12 %
+   \catcode`\_=\active \def_{\_}%
+   \catcode`\^^M=\active \def^^M{\\\relax}%
+   \catcode`\"=\active \def"{\tsv@doublequote}}}
+
+% We want to ignore the newline at the end of the \begin command,
+% but unfortunately we just made it significant,
+% so all the environment commands use this handy gobbler.
+{\catcode`\^^M=\active
+ \gdef\tsv@gobblenewline{\@ifnextchar^^M\@gobble\ignorespaces}}
+
+% Define following character to be the alignment tab
+\def\tsv@definealignchar#1{\catcode`#1=4\relax}
+
+% Define Tab char to be an alignment tab (&)
+\def\tsv@tabonealign{\catcode`\^^I=4\relax}
+
+% Treat one or more Tab chars as a single alignment tab (&).
+{\catcode`\^^I=\active
+  \gdef\tsv@tabmultialign{\catcode`\^^I=\active
+    \def ^^I{\@ifnextchar ^^I{}{&}}}}
+
+% Microsoft Excel put double quotes around some fields and
+% outputs quotations marks as a pair of double quotes.
+% Here we eat an isolated double-quote and turn two in a row into one.
+\def\tsv@doublequote{\catcode`\"=12
+  \@ifnextchar "{\texttt{"}\catcode`\"=\active\@gobble}{\catcode`\"=\active}}
+
+% End of file tsv.sty

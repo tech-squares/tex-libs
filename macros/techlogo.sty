@@ -1,0 +1,55 @@
+% techlogo.sty -- Tech Squares logo
+% Stephen Gildea, September 1994
+% Time-stamp: <2003-03-02 20:17:36 gildea>
+% $Id: techlogo.sty,v 1.3 2002/12/18 19:19:46 gildea Exp $
+% Depends on PostScript specials implemented by the 'dvips' driver.
+% The original techlogo.sty used Zapf Chancery Medium Italic for the words;
+% this version uses a special-purpose font to get the words in the proper
+% calligraphic style.
+
+% user commands:
+
+% \settechlogosize{dimen}  "dimen" sets the vertical size.  Default 1.5in.
+%                               The default of 1.5in is good for posters,
+%                               but for letters and handouts, 1in is less
+%                               over-powering.
+% \techlogo                draw the logo
+% \techlogoline            draw the logo centered on a "line" by itself
+
+% Dec 2002 convert to LaTeX2e style file and use graphics package
+%                               instead of espf.sty
+
+\ProvidesPackage{techlogo}[2002/12/18 Tech Squares logo]
+
+\NeedsTeXFormat{LaTeX2e}[1994/12/01] %for \AtBeginDvi
+
+\newif\iftechlogo@graphicx
+% default is graphicx because it works better with preview-latex
+\techlogo@graphicxtrue
+
+\DeclareOption{graphics}{\techlogo@graphicxfalse}
+\DeclareOption{graphicx}{\techlogo@graphicxtrue}
+\ProcessOptions
+\RequirePackage{\iftechlogo@graphicx graphicx\else graphics\fi}
+
+
+\newdimen\techlogosize
+
+\def\settechlogosize#1{\techlogosize=#1\relax}
+
+\settechlogosize{1.5in}
+
+% This \special is enclosed in an \AtBeginDvi only to make
+% the preview-latex package work.
+\AtBeginDvi{\special{header=TechSquares-font2.pro}}
+
+\def\techlogo{%
+  \iftechlogo@graphicx
+    \includegraphics[height=\techlogosize]{tech-logo-words}%
+  \else
+    \resizebox{!}{\techlogosize}{\includegraphics{tech-logo-words}}%
+  \fi}
+
+\def\techlogoline{\hbox to \hsize{\hss\techlogo\hss}}
+
+% techlogo.sty ends here
